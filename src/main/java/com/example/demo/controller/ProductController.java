@@ -39,4 +39,15 @@ public class ProductController {
         }
     }
 
+    @DeleteMapping("/products")
+    public ResponseEntity<Void> removeProduct(@RequestParam("id") int productId) {
+        boolean success = productService.removeProduct(productId);
+        
+        if (success) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 }
+

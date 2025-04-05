@@ -294,13 +294,31 @@
                 grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
             }
         }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;   
+            height: 30px;          
+            padding-bottom: 10px;    
+        }
+
+        .remove-product-button {
+            padding: 6px 12px;
+            background-color: #000000; /* Red button for remove */
+            color: #fff;
+            font-size: 8px;
+            font-weight: 300;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>StealthShop</h1>
-            <p class="tagline"><i>Get In, Get Out</i></p> 
+            <p class="tagline"><i>Get In, Get Out 💨</i></p> 
 
         </header>
         
@@ -368,6 +386,7 @@
             addToggle.classList.remove('active');
             searchSection.classList.add('active');
             addProductSection.classList.remove('active');
+            searchProducts();
         };
         
         addToggle.onclick = function() {
@@ -379,44 +398,61 @@
         };
         
         function searchProducts() {
-            var query = searchInput.value;
-            
-            resultsContainer.innerHTML = '';
-            
-            fetch('/api/search?q=' + query)
-                .then(function(response) {
-                    return response.json();
-                })
-                .then(function(products) {
-                    console.log(products); 
-                    if (products.length == 0) {
-                        var noResults = document.createElement('div');
-                        noResults.className = 'no-results';
-                        noResults.innerHTML = '<p>No products found for "' + query + '"</p>';
-                        resultsContainer.appendChild(noResults);
-                    } else {
-                        for (var i = 0; i < products.length; i++) {
-                            var product = products[i];
-                            
-                            var productCard = document.createElement('div');
-                            productCard.className = 'product-card';
-                            
-                            productCard.innerHTML = 
-                                '<div class="product-image-container">' +
-                                    '<img src="' + product.image + '" alt="' + product.name + '" class="product-image">' +
-                                '</div>' +
-                                '<div class="product-info">' +
-                                    '<div class="product-name">' + product.name + '</div>' +
-                                    '<div class="product-description">' + product.description + '</div>' +
-                                '</div>';
-                            
-                            resultsContainer.appendChild(productCard);
-                        }
-                    }
-                });
-        }
+        var query = searchInput.value;
         
-    
+        resultsContainer.innerHTML = '';
+        
+        fetch('/api/search?q=' + query)
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(products) {
+                if (products.length == 0) {
+                    var noResults = document.createElement('div');
+                    noResults.className = 'no-results';
+                    noResults.innerHTML = '<p>No products found for "' + query + '"</p>';
+                    resultsContainer.appendChild(noResults);
+                } else {
+                    for (var i = 0; i < products.length; i++) {
+                        var product = products[i];
+                        
+                        var productCard = document.createElement('div');
+                        productCard.className = 'product-card';
+                        
+                        productCard.innerHTML = 
+                            '<div class="product-image-container">' +
+                                '<img src="' + product.image + '" alt="' + product.name + '" class="product-image">' +
+                            '</div>' +
+                            '<div class="product-info">' +
+                                '<div class="product-name">' + product.name + '</div>' +
+                                '<div class="product-description">' + product.description + '</div>' +
+                            '</div>' +
+                            '<div class="button-container"><button class="remove-product-button" onclick="removeProduct(' + product.id + ')">Remove</button></div>';
+;
+;
+                        
+                        resultsContainer.appendChild(productCard);
+                    }
+                }
+            });
+        }
+
+        function removeProduct(productId) {
+            fetch('/api/products?id=' + productId, {
+                method: 'DELETE',
+            })
+            .then(function(response) {
+                if (response.ok) {
+                    searchProducts(); 
+                } else {
+                    alert('Failed to remove product');
+                }
+            })
+            .catch(function(error) {
+                console.error('Error removing product:', error);
+            });
+        }
+
         function addProduct() {
             var productName = document.getElementById('productName').value;
             var productDescription = document.getElementById('productDescription').value;
