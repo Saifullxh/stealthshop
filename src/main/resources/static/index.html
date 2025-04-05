@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Search</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #121212;
+            --bg-card: #1a1a1a;
+            --text-primary: #ffffff;
+            --text-secondary: #aaaaaa;
+            --accent: #ffffff;
+            --accent-hover: #cccccc;
+            --border: #333333;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        
+        .tagline {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 400;
+        }
+        
+        .search-container {
+            margin-bottom: 30px;
+        }
+        
+        .search-form {
+            display: flex;
+            width: 100%;
+        }
+        
+        .search-input {
+            flex-grow: 1;
+            padding: 12px 16px;
+            font-size: 14px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            outline: none;
+        }
+        
+        .search-input:focus {
+            border-color: var(--text-primary);
+        }
+        
+        .search-button {
+            padding: 12px 20px;
+            background-color: var(--accent);
+            color: black;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+        
+        .search-button:hover {
+            background-color: var(--accent-hover);
+        }
+        
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+        }
+        
+        .product-card {
+            background-color: var(--bg-card);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            transition: transform 0.2s ease;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-3px);
+        }
+        
+        .product-image-container {
+            position: relative;
+            padding-bottom: 100%;
+            overflow: hidden;
+        }
+        
+        .product-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .product-info {
+            padding: 10px;
+        }
+        
+        .product-name {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .product-description {
+            color: var(--text-secondary);
+            font-size: 12px;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            max-height: 32px;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--text-secondary);
+            font-size: 16px;
+            grid-column: 1 / -1;
+        }
+
+        .section-toggle {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .toggle-button {
+            padding: 8px 16px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            cursor: pointer;
+            margin: 0 5px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        
+        .toggle-button.active {
+            background-color: var(--accent);
+            color: black;
+        }
+        
+        .toggle-button:hover:not(.active) {
+            border-color: var(--accent);
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        .add-product-form {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .form-textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        
+        .form-input:focus, .form-textarea:focus {
+            border-color: var(--text-primary);
+            outline: none;
+        }
+        
+        .form-button {
+            padding: 12px 20px;
+            background-color: var(--accent);
+            color: black;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .form-button:hover {
+            background-color: var(--accent-hover);
+        }
+        
+        .form-error {
+            color: #ff6b6b;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .success-message {
+            background-color: rgba(0, 255, 0, 0.1);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .product-grid {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+                gap: 12px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .product-info {
+                padding: 8px;
+            }
+            
+            .product-name {
+                font-size: 13px;
+            }
+            
+            .product-description {
+                font-size: 11px;
+            }
+        }
+        
+        @media (min-width: 1200px) {
+            .product-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>StealthShop</h1>
+            <p class="tagline"><i>Get In, Get Out</i></p> 
+
+        </header>
+        
+        <div class="section-toggle">
+            <button id="searchToggle" class="toggle-button active">Search Products</button>
+            <button id="addToggle" class="toggle-button">Add Product</button>
+        </div>
+        
+        <div id="searchSection" class="section active">
+            <div class="search-container">
+                <div class="search-form">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search for products...">
+                    <button id="searchButton" class="search-button">Search</button>
+                </div>
+            </div>
+            
+            <div id="resultsContainer" class="product-grid">
+           
+            </div>
+        </div>
+        
+        <div id="addProductSection" class="section">
+            <div id="successMessage" class="success-message">
+                Product successfully added!
+            </div>
+            
+            <div class="add-product-form">
+                <div class="form-group">
+                    <label for="productName" class="form-label">Product Name</label>
+                    <input type="text" id="productName" class="form-input" placeholder="Enter product name">
+                    <div id="nameError" class="form-error">Product name is required</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="productDescription" class="form-label">Product Description</label>
+                    <textarea id="productDescription" class="form-input form-textarea" 
+                    placeholder="Enter product description" maxlength="50"></textarea>
+                    <div id="descriptionError" class="form-error">Product description is required</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="productImage" class="form-label">Image URL</label>
+                    <input type="text" id="productImage" class="form-input" placeholder="Enter image URL">
+                    <div id="imageError" class="form-error">Valid image URL is required</div>
+                </div>
+                
+                <button id="addProductButton" class="form-button">Add Product</button>
+            </div>
+        </div>
+    </div>
+    
+    <script> 
+        var searchInput = document.getElementById('searchInput');
+        var searchButton = document.getElementById('searchButton');
+        var resultsContainer = document.getElementById('resultsContainer');
+        var searchToggle = document.getElementById('searchToggle');
+        var addToggle = document.getElementById('addToggle');
+        var searchSection = document.getElementById('searchSection');
+        var addProductSection = document.getElementById('addProductSection');
+        var addProductButton = document.getElementById('addProductButton');
+        var successMessage = document.getElementById('successMessage');
+        
+        searchToggle.onclick = function() {
+            searchToggle.classList.add('active');
+            addToggle.classList.remove('active');
+            searchSection.classList.add('active');
+            addProductSection.classList.remove('active');
+        };
+        
+        addToggle.onclick = function() {
+            addToggle.classList.add('active');
+            searchToggle.classList.remove('active');
+            addProductSection.classList.add('active');
+            searchSection.classList.remove('active');
+            searchProducts();
+        };
+        
+        function searchProducts() {
+            var query = searchInput.value;
+            
+            resultsContainer.innerHTML = '';
+            
+            fetch('/api/search?q=' + query)
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(products) {
+                    console.log(products); 
+                    if (products.length == 0) {
+                        var noResults = document.createElement('div');
+                        noResults.className = 'no-results';
+                        noResults.innerHTML = '<p>No products found for "' + query + '"</p>';
+                        resultsContainer.appendChild(noResults);
+                    } else {
+                        for (var i = 0; i < products.length; i++) {
+                            var product = products[i];
+                            
+                            var productCard = document.createElement('div');
+                            productCard.className = 'product-card';
+                            
+                            productCard.innerHTML = 
+                                '<div class="product-image-container">' +
+                                    '<img src="' + product.image + '" alt="' + product.name + '" class="product-image">' +
+                                '</div>' +
+                                '<div class="product-info">' +
+                                    '<div class="product-name">' + product.name + '</div>' +
+                                    '<div class="product-description">' + product.description + '</div>' +
+                                '</div>';
+                            
+                            resultsContainer.appendChild(productCard);
+                        }
+                    }
+                });
+        }
+        
+    
+        function addProduct() {
+            var productName = document.getElementById('productName').value;
+            var productDescription = document.getElementById('productDescription').value;
+            var productImage = document.getElementById('productImage').value;
+        
+            var isValid = true;
+            
+            if (!productName) {
+                document.getElementById('nameError').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('nameError').style.display = 'none';
+            }
+            
+            if (!productDescription) {
+                document.getElementById('descriptionError').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('descriptionError').style.display = 'none';
+            }
+            
+            if (!productImage) {
+                document.getElementById('imageError').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('imageError').style.display = 'none';
+            }
+          
+            if (isValid) {
+                var product = {
+                    name: productName,
+                    description: productDescription,
+                    image: productImage
+                };
+                
+               
+                fetch('/api/products', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(product)
+                })
+                
+                .then(function(response) {
+                    if (response.ok) {
+                        document.getElementById('productName').value = '';
+                        document.getElementById('productDescription').value = '';
+                        document.getElementById('productImage').value = '';
+                        
+                        successMessage.style.display = 'block';
+                        setTimeout(function() {
+                            successMessage.style.display = 'none';
+                        }, 3000);
+                    }
+                    return response.json();
+                })
+                .catch(function(error) {
+                    console.error('Error adding product:', error);
+                });
+            }
+        }
+
+        searchButton.onclick = function() {
+            searchProducts();
+        };
+        
+        searchInput.addEventListener('input', function () {
+            searchProducts();
+        });
+
+        
+        addProductButton.onclick = function() {
+            addProduct();
+        };
+        
+        window.onload = function() {
+            searchProducts();
+        };
+    </script>
+</body>
+</html>
